@@ -1,4 +1,4 @@
-package Vaja1
+package main
 
 import (
 	"context"
@@ -31,10 +31,7 @@ func main() {
 	}
 
 	db.Init(context.Background())
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
+
 	logic := Logic.NewController(db)
 
 	//Kreiramo naš router objekt
