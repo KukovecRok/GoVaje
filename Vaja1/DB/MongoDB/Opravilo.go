@@ -50,26 +50,12 @@ func (dbo *MongoDB) RemoveOpravilo(ctx context.Context, OpraviloID primitive.Obj
 	return
 }
 
-//func (dbo *MongoDB) UpdateOpravilo(ctx context.Context, id primitive.ObjectID, opravilo DataStructures.Opravilo) (err error) {
-/*
-	//opts := options.FindOneAndUpdate().SetUpsert(true)
-	//filter := bson.M{"_id": OpraviloID}
-	filter := bson.M{"_id": bson.M{"$eq": OpraviloID}}
-	update := bson.M{"$set": bson.M{"naslov": opravilo.Naslov, "opis":opravilo.Opis,"datum_dodajanja":opravilo.DatumDodajanja,"previden_datum_dela":opravilo.PredvidenDatumDela}}
-	//var updatedDocument json.RawMessage
-	result, err := dbo.Client.Database(dbo.Database).Collection("opravila").UpdateMany(ctx,filter,update)
-	if err != nil {
-		return
-	}
-	if result.MatchedCount != 0 {     fmt.Println("matched and replaced an existing document")
-	return }
-	return
-*/
 func (dbo *MongoDB) UpdateOpravilo(ctx context.Context, id primitive.ObjectID, opravilo DataStructures.Opravilo) (err error) {
 	filter := bson.M{"_id": id}
 	update := bson.M{"$set": bson.M{
-		"naslov": opravilo.Naslov,
-		"opis":   opravilo.Opis},
+		"naslov":              opravilo.Naslov,
+		"opis":                opravilo.Opis,
+		"previden_datum_dela": opravilo.PredvidenDatumDela},
 	}
 
 	_, err = dbo.Client.Database(dbo.Database).Collection("opravila").UpdateOne(

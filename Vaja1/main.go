@@ -1,5 +1,7 @@
 package main
 
+// obvezno package main!!
+
 import (
 	"context"
 	"fmt"
