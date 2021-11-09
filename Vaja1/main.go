@@ -5,7 +5,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -17,19 +19,33 @@ import (
 )
 
 func main() {
+	err := sentry.Init(sentry.ClientOptions{
+		Dsn: getEnv("SENTRY", "error"),
+	})
+	if err != nil {
+		sentry.CaptureException(err)
+		log.Fatalf("sentry.Init: %s", err)
+	}
+
+	defer sentry.Flush(2 * time.Second)
+
+	//sentry.CaptureMessage("Go vaja1 zalaufala") //Ob vklopu pošlji info error
+
 	port, err := strconv.Atoi(getEnv("MONGO_PORT", "27017"))
 	if err != nil {
+		sentry.CaptureException(err)
+		log.Printf("Sentry.init %s", err)
 		return
 	}
 	//Kreiramo DB objekt, ga inicializiramo in z njim naredimo objekt Logic (Kreiramo MariaDB ampak ga v Logic vstavimo kot tip DB - interface)
 	db := &MongoDB.MongoDB{
-		User:          getEnv("MONGO_USER", "root"),
-		Pass:          getEnv("MONGO_PASS", "root"),
-		IP:            getEnv("MONGO_IP", "localhost"),
+		User:          getEnv("MONGO_USER", "PridobljenoIzEnv"),
+		Pass:          getEnv("MONGO_PASS", "PridobljenoIzEnv"),
+		IP:            getEnv("MONGO_IP", "PridobljenoIzEnv"),
 		Port:          port,
-		Database:      getEnv("MONGO_DB", "pts"),
-		AuthDB:        getEnv("MONGO_AUTH_DB", "admin"),
-		AuthMechanism: getEnv("MONGO_AUTH_MECHANISM", "SCRAM-SHA-256"),
+		Database:      getEnv("MONGO_DB", "PridobljenoIzEnv"),
+		AuthDB:        getEnv("MONGO_AUTH_DB", "PridobljenoIzEnv"),
+		AuthMechanism: getEnv("MONGO_AUTH_MECHANISM", "PridobljenoIzEnvost"),
 	}
 
 	db.Init(context.Background())
@@ -44,6 +60,7 @@ func main() {
 	//Registriramo HTTP REST API povezave
 	err = router.registerRoutes()
 	if err != nil {
+		sentry.CaptureException(err)
 		fmt.Println(err.Error())
 		return
 	}
@@ -71,6 +88,7 @@ func main() {
 
 		srv.SetKeepAlivesEnabled(false)
 		if err := srv.Shutdown(ctx); err != nil {
+			sentry.CaptureException(err)
 			fmt.Println(err.Error())
 		}
 		close(done)
@@ -81,6 +99,7 @@ func main() {
 	go func() {
 
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			sentry.CaptureException(err)
 			fmt.Println(err.Error())
 		}
 		os.Exit(1)

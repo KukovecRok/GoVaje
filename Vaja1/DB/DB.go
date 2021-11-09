@@ -13,4 +13,8 @@ type DB interface {
 	InsertOpravilo(ctx context.Context, opravilo DataStructures.Opravilo) (err error)
 	RemoveOpravilo(ctx context.Context, opraviloID primitive.ObjectID) (err error)
 	UpdateOpravilo(ctx context.Context, id primitive.ObjectID, opravilo DataStructures.Opravilo) (err error)
+
+	GetHealth(ctx context.Context) (zdravje string, err error)
+
+	InsertUser(ctx context.Context, user DataStructures.User) (err error)
 }

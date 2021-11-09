@@ -2,14 +2,18 @@ package MongoDB
 
 import (
 	"context"
+	"github.com/getsentry/sentry-go"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"log"
 	"todorokvaja1/DataStructures"
 )
 
 func (dbo *MongoDB) GetOpravilo(ctx context.Context) (opravila []DataStructures.Opravilo, err error) {
 	cursor, err := dbo.Client.Database(dbo.Database).Collection("opravila").Find(ctx, bson.M{})
 	if err != nil {
+		sentry.CaptureException(err)
+		log.Printf("Sentry.init %s", err)
 		return
 	}
 
@@ -17,6 +21,8 @@ func (dbo *MongoDB) GetOpravilo(ctx context.Context) (opravila []DataStructures.
 
 	err = cursor.All(ctx, &opravila)
 	if err != nil {
+		sentry.CaptureException(err)
+		log.Printf("Sentry.init %s", err)
 		return
 	}
 	return
@@ -26,6 +32,8 @@ func (dbo *MongoDB) GetOpraviloById(ctx context.Context, id primitive.ObjectID) 
 
 	err = dbo.Client.Database(dbo.Database).Collection("opravila").FindOne(ctx, bson.M{"_id": id}).Decode(&opravilo)
 	if err != nil {
+		sentry.CaptureException(err)
+		log.Printf("Sentry.init %s", err)
 		return
 	}
 
@@ -35,6 +43,8 @@ func (dbo *MongoDB) InsertOpravilo(ctx context.Context, opravilo DataStructures.
 
 	_, err = dbo.Client.Database(dbo.Database).Collection("opravila").InsertOne(ctx, opravilo)
 	if err != nil {
+		sentry.CaptureException(err)
+		log.Printf("Sentry.init %s", err)
 		return
 	}
 
@@ -44,6 +54,8 @@ func (dbo *MongoDB) RemoveOpravilo(ctx context.Context, OpraviloID primitive.Obj
 
 	_, err = dbo.Client.Database(dbo.Database).Collection("opravila").DeleteOne(ctx, bson.M{"_id": OpraviloID})
 	if err != nil {
+		sentry.CaptureException(err)
+		log.Printf("Sentry.init %s", err)
 		return
 	}
 
@@ -64,6 +76,8 @@ func (dbo *MongoDB) UpdateOpravilo(ctx context.Context, id primitive.ObjectID, o
 		update,
 	)
 	if err != nil {
+		sentry.CaptureException(err)
+		log.Printf("Sentry.init %s", err)
 		return err
 	}
 	return

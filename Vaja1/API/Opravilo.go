@@ -1,8 +1,10 @@
 package API
 
 import (
+	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"log"
 	"net/http"
 	"todorokvaja1/DataStructures"
 )
@@ -12,6 +14,8 @@ func (a *Controller) GetOpravilo(c *gin.Context) {
 	opravilo, err := a.c.GetOpravilo(c.Request.Context())
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
+		sentry.CaptureException(err)
+		log.Printf("Sentry.init %s", err)
 	}
 
 	// Vse ok - Status 200
@@ -23,6 +27,8 @@ func (a *Controller) GetOpraviloById(c *gin.Context) {
 	if err != nil {
 		//Vrne error 400 - Bad request
 		c.String(http.StatusBadRequest, err.Error())
+		sentry.CaptureException(err)
+		log.Printf("Sentry.init %s", err)
 		return
 	}
 
@@ -30,6 +36,8 @@ func (a *Controller) GetOpraviloById(c *gin.Context) {
 	if err != nil {
 		//Vrne error 500 - Internal server error
 		c.String(http.StatusInternalServerError, err.Error())
+		sentry.CaptureException(err)
+		log.Printf("Sentry.init %s", err)
 		return
 	}
 	//JSON serializacija
@@ -44,6 +52,8 @@ func (a *Controller) InsertOpravilo(c *gin.Context) {
 	if err != nil {
 		//Vrne error 400 - Bad request
 		c.String(http.StatusBadRequest, err.Error())
+		sentry.CaptureException(err)
+		log.Printf("Sentry.init %s", err)
 		return
 	}
 
@@ -51,6 +61,8 @@ func (a *Controller) InsertOpravilo(c *gin.Context) {
 	if err != nil {
 		//Vrne error 400 - Bad request
 		c.String(http.StatusBadRequest, err.Error())
+		sentry.CaptureException(err)
+		log.Printf("Sentry.init %s", err)
 		return
 	}
 
@@ -63,6 +75,9 @@ func (a *Controller) RemoveOpravilo(c *gin.Context) {
 	if err != nil {
 		//Vrne error 400 - Bad request
 		c.String(http.StatusBadRequest, err.Error())
+		//log.Fatalf("sentry.Init: %s", err)
+		sentry.CaptureException(err)      // Lovljenje errorjev na Sentry.io
+		log.Printf("Sentry.init %s", err) //console log, ni fatal, da ne terminata vsega skupaj
 		return
 	}
 
@@ -70,6 +85,8 @@ func (a *Controller) RemoveOpravilo(c *gin.Context) {
 	if err != nil {
 		//Vrne error 400 - Bad request
 		c.String(http.StatusBadRequest, err.Error())
+		sentry.CaptureException(err)
+		log.Printf("Sentry.init %s", err)
 		return
 	}
 	c.String(http.StatusOK, "odstranjujem opravilo")
@@ -81,6 +98,8 @@ func (a *Controller) UpdateOpravilo(c *gin.Context) {
 	if err != nil {
 		//Vrne error 400 - Bad request
 		c.String(http.StatusBadRequest, err.Error())
+		sentry.CaptureException(err)
+		log.Printf("Sentry.init %s", err)
 		return
 	}
 
@@ -89,6 +108,8 @@ func (a *Controller) UpdateOpravilo(c *gin.Context) {
 	if err != nil {
 		//Vrne error 409 - Conflict
 		c.String(http.StatusConflict, err.Error())
+		sentry.CaptureException(err)
+		log.Printf("Sentry.init %s", err)
 		return
 	}
 
@@ -96,6 +117,8 @@ func (a *Controller) UpdateOpravilo(c *gin.Context) {
 	if err != nil {
 		//Vrne error 400 - Bad request
 		c.String(http.StatusBadRequest, err.Error())
+		sentry.CaptureException(err)
+		log.Printf("Sentry.init %s", err)
 		return
 	}
 

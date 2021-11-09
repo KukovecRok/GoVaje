@@ -3,10 +3,12 @@ package MongoDB
 import (
 	"context"
 	"fmt"
+	"github.com/getsentry/sentry-go"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"log"
 	"time"
 	"todorokvaja1/DataStructures"
 )
@@ -32,11 +34,14 @@ func (dbo *MongoDB) Init(ctx context.Context) (err error) {
 
 	dbo.Client, err = mongo.NewClient(options.Client().ApplyURI(connectionURI))
 	if err != nil {
+		sentry.CaptureException(err)
+		log.Printf("Sentry.init %s", err)
 		return
 	}
 	err = dbo.Client.Connect(ctx)
 	if err != nil {
-
+		sentry.CaptureException(err)
+		log.Printf("Sentry.init %s", err)
 		return
 	}
 	err = dbo.DoInit(ctx)
@@ -48,6 +53,8 @@ func (dbo *MongoDB) DoInit(ctx context.Context) (err error) {
 
 	if count, err := dbo.Client.Database(dbo.Database).Collection("opravila").CountDocuments(ctx, bson.M{}); count == 0 {
 		if err != nil {
+			sentry.CaptureException(err)
+			log.Printf("Sentry.init %s", err)
 			return err
 		}
 		_, err = dbo.Client.Database(dbo.Database).Collection("opravila").InsertOne(ctx, DataStructures.Opravilo{
@@ -57,12 +64,16 @@ func (dbo *MongoDB) DoInit(ctx context.Context) (err error) {
 			DatumDodajanja:     time.Now(),
 		})
 		if err != nil {
+			sentry.CaptureException(err)
+			log.Printf("Sentry.init %s", err)
 			return err
 		}
 	}
 
 	err = dbo.Client.Ping(ctx, readpref.Primary())
 	if err != nil {
+		sentry.CaptureException(err)
+		log.Printf("Sentry.init %s", err)
 		return err
 	}
 
