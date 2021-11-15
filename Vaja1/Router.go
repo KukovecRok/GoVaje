@@ -59,8 +59,8 @@ func (r *Router) registerOpraviloRoutes(opravilo *gin.RouterGroup) {
 	opravilo.PUT("/:todo_id", r.api.UpdateOpravilo)
 }
 func (r *Router) registerLoginRoutes(login *gin.RouterGroup) {
-	login.POST("/", r.api.InsertUser)
-	login.POST("/prijava", Login)
+	login.POST("/register", r.api.InsertUser)
+	login.POST("/", Login)
 }
 
 func (r *Router) registerHealthRoutes(health *gin.RouterGroup) {

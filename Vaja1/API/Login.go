@@ -32,6 +32,7 @@ func (a *Controller) InsertUser(c *gin.Context) {
 	}
 
 	err = a.c.InsertUser(c.Request.Context(), user)
+
 	if err != nil {
 		//Vrne error 400 - Bad request
 		c.String(http.StatusBadRequest, err.Error())
@@ -40,5 +41,5 @@ func (a *Controller) InsertUser(c *gin.Context) {
 		return
 	}
 
-	c.String(http.StatusOK, "vstavljam novega userja")
+	c.String(http.StatusOK, "registracija novega userja")
 }

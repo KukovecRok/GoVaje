@@ -28,6 +28,16 @@ func (dbo *MongoDB) InsertUser(ctx context.Context, user DataStructures.User) (e
 		return
 	}
 
+	var uporabnik DataStructures.User
+	err = dbo.Client.Database(dbo.Database).Collection("user").FindOne(ctx, bson.M{"username": user.Username}).Decode(&uporabnik)
+	if err == nil {
+		log.Printf("Najdel userja s tem nicknameom %s", err)
+		sentry.CaptureException(err)
+		return
+	} else {
+		log.Printf("Poteka registracija novega uporabnika")
+	}
+
 	_, err = dbo.Client.Database(dbo.Database).Collection("user").InsertOne(ctx, user)
 	if err != nil {
 		sentry.CaptureException(err)
