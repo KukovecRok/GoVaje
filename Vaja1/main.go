@@ -19,6 +19,7 @@ import (
 )
 
 func main() {
+
 	err := sentry.Init(sentry.ClientOptions{
 		Dsn: getEnv("SENTRY", "error"),
 	})
@@ -29,7 +30,7 @@ func main() {
 
 	defer sentry.Flush(2 * time.Second)
 
-	//sentry.CaptureMessage("Go vaja1 zalaufala") //Ob vklopu pošlji info error
+	sentry.CaptureMessage("Go vaja1 zalaufala") //Ob vklopu pošlji info "error"
 
 	port, err := strconv.Atoi(getEnv("MONGO_PORT", "27017"))
 	if err != nil {
@@ -45,7 +46,7 @@ func main() {
 		Port:          port,
 		Database:      getEnv("MONGO_DB", "PridobljenoIzEnv"),
 		AuthDB:        getEnv("MONGO_AUTH_DB", "PridobljenoIzEnv"),
-		AuthMechanism: getEnv("MONGO_AUTH_MECHANISM", "PridobljenoIzEnvost"),
+		AuthMechanism: getEnv("MONGO_AUTH_MECHANISM", "PridobljenoIzEnv"),
 	}
 
 	db.Init(context.Background())
@@ -56,6 +57,8 @@ func main() {
 	var router Router
 	router.engine = gin.Default()
 	router.api = API.NewController(logic)
+	router.engine.Use(gin.Logger())
+	router.engine.Use(gin.Recovery())
 
 	//Registriramo HTTP REST API povezave
 	err = router.registerRoutes()
@@ -92,7 +95,6 @@ func main() {
 			fmt.Println(err.Error())
 		}
 		close(done)
-
 	}()
 
 	//V ločenem threadu zaženemo HTTP server
@@ -103,7 +105,6 @@ func main() {
 			fmt.Println(err.Error())
 		}
 		os.Exit(1)
-
 	}()
 
 	//Čakamo na konec izvajanja. Vsi deli programa so sedaj zagnani v ločenih threadih.
@@ -116,4 +117,23 @@ func getEnv(key, fallback string) string {
 		return value
 	}
 	return fallback
+}
+func Logger() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		t := time.Now()
+
+		// Set example variable
+		c.Set("example", "12345")
+		// before request
+
+		c.Next()
+
+		// after request
+		latency := time.Since(t)
+		log.Print(latency)
+
+		// access the status we are sending
+		status := c.Writer.Status()
+		log.Println(status)
+	}
 }
