@@ -1,6 +1,7 @@
 package API
 
 import (
+	"fmt"
 	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -11,6 +12,7 @@ import (
 
 func (a *Controller) GetOpravilo(c *gin.Context) {
 	//[]DataStructure Opravilo - Array vseh opravil
+	fmt.Println(c.Get("user_id"))
 	opravilo, err := a.c.GetOpravilo(c.Request.Context())
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())

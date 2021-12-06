@@ -70,6 +70,17 @@ func (dbo *MongoDB) DoInit(ctx context.Context) (err error) {
 		}
 	}
 
+	/*
+		_, err = dbo.Client.Database(dbo.Database).Collection("user").Indexes().CreateOne(ctx, mongo.IndexModel{
+			Keys: bson.A{"username"},
+			Options: options.Index().SetUnique(true),
+		})
+		if err != nil {
+			sentry.CaptureException(err)
+			log.Printf("Sentry.init %s", err)
+			return err
+		}
+	*/
 	err = dbo.Client.Ping(ctx, readpref.Primary())
 	if err != nil {
 		sentry.CaptureException(err)

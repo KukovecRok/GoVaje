@@ -2,7 +2,6 @@ package API
 
 import (
 	"errors"
-	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
@@ -12,13 +11,12 @@ import (
 	"os"
 	"time"
 	"todorokvaja1/DataStructures"
-	"todorokvaja1/Token"
 )
 
 func (a *Controller) Login(c *gin.Context) {
 
-	var user DataStructures.User
-	err := c.BindJSON(&user)
+	var userLogin DataStructures.UserLogin
+	err := c.BindJSON(&userLogin)
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		sentry.CaptureException(err)
@@ -26,40 +24,9 @@ func (a *Controller) Login(c *gin.Context) {
 		return
 	}
 
-	pravilno, err := a.c.Login(c.Request.Context(), user)
+	user, err := a.c.Login(c.Request.Context(), userLogin)
 
-	if pravilno != true {
-		//Vrne error 401 - Unauthorized
-		c.String(http.StatusUnauthorized, "Prijava uspešna: %t", pravilno)
-		err = errors.New("Unauthorized")
-		sentry.CaptureException(err)
-		log.Printf("Sentry.init %s", err)
-		return
-	}
-
-	token, err := CreateToken(user.Id)
-	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, err.Error())
-		return
-	}
-
-	maker, err := Token.NewJWTMaker("98zgbnmkiutfvbnjuztreertgbnjzdfbnjkKIUZTFCVBJUZFCVBNJKIUZGFCVBNMKiuztrdcvbnmkiuztfvb")
-
-	username := user.Username
-	duration := time.Minute
-
-	issuedAt := time.Now()
-	expiredAt := issuedAt.Add(duration)
-	fmt.Print(expiredAt)
-
-	token, err = maker.CreateToken(username, duration)
-
-	payload, err := maker.VerifyToken(token)
-	fmt.Println(payload)
-	fmt.Println("TEST")
-	fmt.Println(maker.VerifyToken(token))
-
-	c.String(http.StatusOK, "Prijava uspešna: %t, nov token: %s", pravilno, token)
+	c.String(http.StatusOK, "Prijava uspešna: %s", user)
 }
 
 func (a *Controller) InsertUser(c *gin.Context) {

@@ -3,14 +3,19 @@ package main
 // obvezno package main!!
 
 import (
-	"fmt"
+	"errors"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
+	"net/http"
+	"strings"
 	"todorokvaja1/API"
 )
 
 type Router struct {
 	engine *gin.Engine
 	api    API.Controller
+	secret []byte
 }
 
 func (r *Router) registerRoutes() (err error) {
@@ -18,24 +23,23 @@ func (r *Router) registerRoutes() (err error) {
 	//Pot /api/v1/to.do
 	api := r.engine.Group("/api/v1/todo")
 
-	test := api.Group("/test")
-	test.GET("/", r.CheckPermission(101), r.api.GetOpravilo)
-
 	//Pot /api/v1/"to_do/opravilo
 	opravilo := api.Group("/opravilo")
+	opravilo.Use(r.CheckPermission())
 	r.registerOpraviloRoutes(opravilo)
 
 	login := api.Group("/login")
 	r.registerLoginRoutes(login)
 
 	health := api.Group("/health")
+	health.Use(r.CheckPermission())
 	r.registerHealthRoutes(health)
 
 	return
 }
 
 func (r *Router) registerOpraviloRoutes(opravilo *gin.RouterGroup) {
-	opravilo.GET("/", r.CheckPermission(101), r.api.GetOpravilo)
+	opravilo.GET("/", r.api.GetOpravilo)
 	opravilo.POST("/", r.api.InsertOpravilo)
 	opravilo.GET("/:todo_id", r.api.GetOpraviloById)
 	opravilo.DELETE("/:todo_id", r.api.RemoveOpravilo)
@@ -64,27 +68,31 @@ DELETE BY ID http://localhost:8000/api/v1/to do/opravilo/ID
 PUT http://localhost:8000/api/v1/to do/opravilo/ID + JSON, enako kot POST
 */
 
-func (r *Router) basicMiddleware() gin.HandlerFunc {
+func (r *Router) CheckPermission() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		//Ta del se izvede pred nadaljnjimi stvarmi
-		fmt.Println("Before")
+		tokenString := c.GetHeader("Authorization")
+		tokenSplit := strings.Split(tokenString, " ")
+		if len(tokenSplit) != 2 {
+			c.AbortWithError(500, errors.New("Nepravilno splitanje tokena"))
+			return
+		}
+		token := tokenSplit[1]
 
-		//Z tem nadaljujemo zahtevo
-		c.Next()
-
-		//Ta del se izvede za nadaljnjimi stvarmi
-		fmt.Println("After")
-
-	}
-}
-
-func (r *Router) CheckPermission(permissionNumber int) gin.HandlerFunc {
-	return func(c *gin.Context) {
-
-		/*
-			Izvedemo kodo za preverjanje pravic in spustimo zahtevo naprej ali jo zavrnemo
-		*/
-
+		tokenParsed, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				sentry.CaptureException(errors.New("error checking JWT token"))
+				c.AbortWithStatus(http.StatusUnauthorized)
+				return nil, errors.New("there was an error")
+			}
+			return r.secret, nil
+		})
+		if err != nil {
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+		if claims, ok := tokenParsed.Claims.(jwt.MapClaims); ok && tokenParsed.Valid {
+			c.Set("user_id", claims["user_id"])
+		}
 	}
 }
