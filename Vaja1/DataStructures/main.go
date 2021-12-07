@@ -18,6 +18,8 @@ type User struct {
 	Username string             `json:"username"`
 	Password string             `json:"password"`
 }
-type Token struct {
-	secretKey string
+
+type UserLogin struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
 }

@@ -51,7 +51,7 @@ func main() {
 
 	db.Init(context.Background())
 
-	logic := Logic.NewController(db)
+	logic := Logic.NewController(db, []byte("i87i7tzfjhvkbjhlkizutizrfhvjb"))
 
 	//Kreiramo naš router objekt
 	var router Router
@@ -59,6 +59,7 @@ func main() {
 	router.api = API.NewController(logic)
 	router.engine.Use(gin.Logger())
 	router.engine.Use(gin.Recovery())
+	router.secret = []byte("i87i7tzfjhvkbjhlkizutizrfhvjb")
 
 	//Registriramo HTTP REST API povezave
 	err = router.registerRoutes()

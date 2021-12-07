@@ -6,12 +6,14 @@ import (
 )
 
 type Controller struct {
-	db DB.DB
+	db     DB.DB
+	secret []byte
 }
 
-func NewController(db DB.DB) *Controller {
+func NewController(db DB.DB, secret []byte) *Controller {
 	return &Controller{
-		db: db,
+		db:     db,
+		secret: secret,
 	}
 }
 
