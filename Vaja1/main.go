@@ -135,6 +135,7 @@ func Logger() gin.HandlerFunc {
 
 		// access the status we are sending
 		status := c.Writer.Status()
+
 		log.Println(status)
 	}
 }

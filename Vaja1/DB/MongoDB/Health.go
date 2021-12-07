@@ -7,6 +7,7 @@ import (
 )
 
 func (dbo *MongoDB) GetHealth(ctx context.Context) (zdravje string, err error) {
+
 	zdravje = "zdrav"
 	if err != nil {
 		sentry.CaptureException(err)

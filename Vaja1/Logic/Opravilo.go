@@ -25,4 +25,5 @@ func (c *Controller) RemoveOpravilo(ctx context.Context, OpraviloID primitive.Ob
 func (c *Controller) UpdateOpravilo(ctx context.Context, id primitive.ObjectID, opravilo DataStructures.Opravilo) (err error) {
 
 	return c.db.UpdateOpravilo(ctx, id, opravilo)
+
 }

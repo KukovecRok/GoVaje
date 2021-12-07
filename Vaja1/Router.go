@@ -85,6 +85,7 @@ func (r *Router) CheckPermission() gin.HandlerFunc {
 				c.AbortWithStatus(http.StatusUnauthorized)
 				return nil, errors.New("there was an error")
 			}
+
 			return r.secret, nil
 		})
 		if err != nil {
